@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="es">listo 
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#0a0a0a"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<title>Control de Jornada</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #f5c518;
+    --accent2: #e07b00;
+    --danger: #e84040;
+    --success: #2ecc71;
+    --text: #f0f0f0;
+    --text2: #888;
+    --font-display: 'Barlow Condensed', sans-serif;
+    --font-body: 'Barlow', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--accent);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-logo {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--accent);
+  }
+  .header-logo span { color: var(--text); }
+  .header-time {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 1px;
+  }
+
+  /* SCREENS */
+  .screen { display: none; padding: 20px; animation: fadeIn .25s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* PANTALLA: HOME */
+  .home-hero {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 20px;
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .home-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .home-hero-icon {
+    font-size: 52px;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .home-hero h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .home-hero p { color: var(--text2); font-size: 14px; }
+
+  .worker-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .worker-avatar {
+    width: 40px; height: 40px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 18px;
+    color: #000;
+    flex-shrink: 0;
+  }
+  .worker-info { flex: 1; }
+  .worker-name { font-weight: 600; font-size: 15px; }
+  .worker-id { color: var(--text2); font-size: 12px; }
+
+  .action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .action-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .action-btn:active { transform: scale(0.97); }
+  .action-btn.inicio { border-color: var(--accent); }
+  .action-btn.inicio:hover { background: rgba(245,197,24,.08); }
+  .action-btn.cierre { border-color: var(--danger); }
+  .action-btn.cierre:hover { background: rgba(232,64,64,.08); }
+  .action-btn-icon { font-size: 32px; margin-bottom: 8px; display: block; }
+  .action-btn-label {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .5px;
+  }
+  .action-btn.inicio .action-btn-label { color: var(--accent); }
+  .action-btn.cierre .action-btn-label { color: var(--danger); }
+  .action-btn-sub { color: var(--text2); font-size: 11px; margin-top: 3px; }
+
+  /* LOGIN SIMPLE */
+  .login-wrap { max-width: 360px; margin: 40px auto; }
+  .login-wrap h2 {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .login-wrap p { color: var(--text2); font-size: 14px; margin-bottom: 28px; }
+
+  /* FORMULARIO */
+  .form-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .form-section-title {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .form-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  input[type=text], input[type=number], textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .field-readonly {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--text2);
+    font-family: var(--font-body);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .field-readonly .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    flex-shrink: 0;
+    box-shadow: 0 0 6px var(--success);
+  }
+  .field-readonly.loading .dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* FOTO */
+  .photo-area {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .photo-area:hover { border-color: var(--accent); }
+  .photo-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .photo-preview {
+    width: 100%; max-height: 160px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: none;
+  }
+  .photo-placeholder { color: var(--text2); font-size: 13px; }
+  .photo-placeholder span { font-size: 28px; display: block; margin-bottom: 6px; }
+
+  /* SCANNER */
+  .scanner-wrap {
+    position: relative;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    aspect-ratio: 1;
+    max-height: 320px;
+  }
+  #scanner-video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .scanner-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .scanner-frame {
+    width: 60%;
+    aspect-ratio: 1;
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+  }
+  .scanner-frame::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    animation: scan 2s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--accent);
+  }
+  @keyframes scan { 0%,100%{top:0} 50%{top:100%} }
+  .scanner-hint {
+    position: absolute;
+    bottom: 14px; left: 0; right: 0;
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255,255,255,.7);
+  }
+
+  /* BUTTONS */
+  .btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 10px;
+    border: none;
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all .2s;
+    text-transform: uppercase;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+  .btn-primary:hover { background: #ffd23a; }
+  .btn-danger {
+    background: var(--danger);
+    color: #fff;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 14px;
+    padding: 12px;
+    margin-top: 10px;
+  }
+  .btn-outline:hover { border-color: var(--text2); color: var(--text); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* MAQUINA CARD */
+  .maquina-card {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .maquina-icon {
+    font-size: 40px;
+    flex-shrink: 0;
+  }
+  .maquina-id {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+  .maquina-name { font-size: 14px; color: var(--text2); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 999;
+    transition: transform .3s ease;
+    white-space: nowrap;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--success); color: var(--success); }
+  .toast.error { border-color: var(--danger); color: var(--danger); }
+
+  /* SUCCESS SCREEN */
+  .success-screen {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .success-icon {
+    font-size: 72px;
+    display: block;
+    margin-bottom: 20px;
+    animation: pop .4s cubic-bezier(.175,.885,.32,1.275);
+  }
+  @keyframes pop { from{transform:scale(0)} to{transform:scale(1)} }
+  .success-screen h2 {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .success-screen p { color: var(--text2); font-size: 15px; margin-bottom: 30px; }
+  .success-detail {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { color: var(--text2); }
+  .detail-value { font-weight: 600; }
+
+  /* STEP INDICATOR */
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .step {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text2);
+    transition: all .3s;
+  }
+  .step.active { border-color: var(--accent); color: var(--accent); }
+  .step.done { background: var(--accent); border-color: var(--accent); color: #000; }
+  .step-line { flex: 1; height: 2px; background: var(--border); max-width: 40px; }
+  .step-line.done { background: var(--accent); }
+
+  /* PAGE TITLE */
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    margin-bottom: 4px;
+  }
+  .page-sub { color: var(--text2); font-size: 13px; margin-bottom: 20px; }
+
+  /* NOVEDAD TOGGLE */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+  }
+  .toggle-label { font-size: 14px; font-weight: 500; }
+  .toggle {
+    width: 44px; height: 24px;
+    background: var(--border);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .toggle.on { background: var(--danger); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform .2s;
+  }
+  .toggle.on::after { transform: translateX(20px); }
+
+  .novedad-fields { display: none; }
+  .novedad-fields.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">CONTROL<span>JORNADA</span></div>
+  <div class="header-time" id="clock">--:--</div>
+</div>
+
+<!-- ======================== LOGIN ======================== -->
+<div class="screen active" id="screen-login">
+  <div class="login-wrap">
+    <h2>Ingresa al sistema</h2>
+    <p>Identifícate para registrar tu jornada</p>
+
+    <div class="field">
+      <label>Tu nombre</label>
+      <input type="text" id="worker-name" placeholder="Ej: Carlos Martínez" autocomplete="name"/>
+    </div>
+    <div class="field">
+      <label>ID de operario</label>
+      <input type="text" id="worker-id" placeholder="Ej: OP-042"/>
+    </div>
+
+    <button class="btn btn-primary" style="margin-top:12px" onclick="doLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- ======================== HOME ======================== -->
+<div class="screen" id="screen-home">
+  <div class="home-hero">
+    <span class="home-hero-icon">🏭</span>
+    <h1>Control de Jornada</h1>
+    <p>Escanea el QR del montacargas para registrar</p>
+  </div>
+
+  <div class="worker-badge">
+    <div class="worker-avatar" id="avatar-initials">--</div>
+    <div class="worker-info">
+      <div class="worker-name" id="display-name">Operario</div>
+      <div class="worker-id" id="display-id">ID: ---</div>
+    </div>
+  </div>
+
+  <div class="action-grid">
+    <div class="action-btn inicio" onclick="startFlow('inicio')">
+      <span class="action-btn-icon">▶️</span>
+      <div class="action-btn-label">Iniciar</div>
+      <div class="action-btn-sub">Comenzar jornada</div>
+    </div>
+    <div class="action-btn cierre" onclick="startFlow('cierre')">
+      <span class="action-btn-icon">⏹️</span>
+      <div class="action-btn-label">Cerrar</div>
+      <div class="action-btn-sub">Finalizar jornada</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SCANNER ======================== -->
+<div class="screen" id="screen-scanner">
+  <div class="steps">
+    <div class="step done" id="step1">1</div>
+    <div class="step-line done"></div>
+    <div class="step active" id="step2">2</div>
+    <div class="step-line"></div>
+    <div class="step" id="step3">3</div>
+  </div>
+
+  <div class="page-title" id="scanner-title">Escanear montacargas</div>
+  <div class="page-sub">Apunta la cámara al código QR del montacargas</div>
+
+  <div class="scanner-wrap">
+    <video id="scanner-video" playsinline autoplay muted></video>
+    <div class="scanner-overlay">
+      <div class="scanner-frame"></div>
+    </div>
+    <div class="scanner-hint">Mantén el QR dentro del recuadro</div>
+  </div>
+
+  <button class="btn btn-outline" onclick="goHome()">← Cancelar</button>
+</div>
+
+<!-- ======================== FORMULARIO INICIO ======================== -->
+<div class="screen" id="screen-form-inicio">
+  <div class="steps">
+    <div class="step done">1</div>
+    <div class="step-line done"></div>
+    <div class="step done">2</div>
+    <div class="step-line done"></div>
+    <div class="step active">3</div>
+  </div>
+
+  <div class="page-title">Inicio de jornada</div>
+  <div class="page-sub">Completa la información del turno</div>
+
+  <div class="maquina-card">
+    <div class="maquina-icon">🚜</div>
+    <div>
+      <div class="maquina-id" id="display-maquina-inicio">MC-00</div>
+      <div class="maquina-name">Montacargas identificado</div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">📍 Ubicación y hora</div>
+    <div class="field">
+      <label>Hora de inicio</label>
+      <div class="field-readonly" id="hora-inicio-display">--:-- --</div>
+    </div>
+    <div class="field">
+      <label>GPS</label>
+      <div class="field-readonly loading" id="gps-inicio-display">
+        <div class="dot"></div>
+        <span>Obteniendo ubicación...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">🔢 Datos del turno</div>
+    <div class="field">
+      <label>Kilometraje inicial</label>
+      <input type="number" id="km-inicio" placeholder="Ej: 12450" min="0"/>
+    </div>
+    <div class="field">
+      <label>Bodega de operación</label>
+      <select id="bodega-inicio">
+        <option value="">Seleccionar bodega...</option>
+        <option>Bodega A — Zona Norte</option>
+        <option>Bodega B — Zona Sur</option>
+        <option>Bodega C — Patio Externo</option>
+        <option>Bodega D — Refrigerados</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">📷 Foto de inicio</div>
+    <div class="photo-area" onclick="document.getElementById('foto-inicio').click()">
+      <input type="file" id="foto-inicio" accept="image/*" capture="environment" onchange="previewPhoto(this,'preview-inicio','placeholder-inicio')"/>
+      <img class="photo-preview" id="preview-inicio"/>
+      <div class="photo-placeholder" id="placeholder-inicio">
+        <span>📷</span>
+        Toca para tomar foto del montacargas
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" id="btn-enviar-inicio" onclick="enviarInicio()">Registrar inicio de jornada</button>
+  <button class="btn btn-outline" onclick="goHome()">← Cancelar</button>
+</div>
+
+<!-- ======================== FORMULARIO CIERRE ======================== -->
+<div class="screen" id="screen-form-cierre">
+  <div class="steps">
+    <div class="step done">1</div>
+    <div class="step-line done"></div>
+    <div class="step done">2</div>
+    <div class="step-line done"></div>
+    <div class="step active">3</div>
+  </div>
+
+  <div class="page-title">Cierre de jornada</div>
+  <div class="page-sub">Registra el estado final del turno</div>
+
+  <div class="maquina-card">
+    <div class="maquina-icon">🚜</div>
+    <div>
+      <div class="maquina-id" id="display-maquina-cierre">MC-00</div>
+      <div class="maquina-name">Montacargas identificado</div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">📍 Ubicación y hora</div>
+    <div class="field">
+      <label>Hora de cierre</label>
+      <div class="field-readonly" id="hora-cierre-display">--:-- --</div>
+    </div>
+    <div class="field">
+      <label>GPS</label>
+      <div class="field-readonly loading" id="gps-cierre-display">
+        <div class="dot"></div>
+        <span>Obteniendo ubicación...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">🔢 Datos del cierre</div>
+    <div class="field">
+      <label>Kilometraje final</label>
+      <input type="number" id="km-cierre" placeholder="Ej: 12680" min="0"/>
+    </div>
+    <div class="field">
+      <label>Nivel de combustible / carga</label>
+      <select id="combustible">
+        <option value="">Seleccionar...</option>
+        <option>Lleno (100%)</option>
+        <option>Tres cuartos (75%)</option>
+        <option>Mitad (50%)</option>
+        <option>Un cuarto (25%)</option>
+        <option>Vacío — requiere recarga</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">⚠️ Novedades</div>
+    <div class="toggle-row">
+      <span class="toggle-label">¿Ocurrió alguna novedad?</span>
+      <div class="toggle" id="toggle-novedad" onclick="toggleNovedad()"></div>
+    </div>
+    <div class="novedad-fields" id="novedad-fields">
+      <div class="field">
+        <label>Describe la novedad</label>
+        <textarea id="descripcion-novedad" placeholder="Describe qué pasó con detalle..."></textarea>
+      </div>
+      <div class="field">
+        <label>Foto del problema</label>
+        <div class="photo-area" onclick="document.getElementById('foto-novedad').click()">
+          <input type="file" id="foto-novedad" accept="image/*" capture="environment" onchange="previewPhoto(this,'preview-novedad','placeholder-novedad')"/>
+          <img class="photo-preview" id="preview-novedad"/>
+          <div class="photo-placeholder" id="placeholder-novedad">
+            <span>📷</span>
+            Foto del daño o problema
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-danger" id="btn-enviar-cierre" onclick="enviarCierre()">Registrar cierre de jornada</button>
+  <button class="btn btn-outline" onclick="goHome()">← Cancelar</button>
+</div>
+
+<!-- ======================== ÉXITO ======================== -->
+<div class="screen" id="screen-success">
+  <div class="success-screen">
+    <span class="success-icon" id="success-icon">✅</span>
+    <h2 id="success-title">¡Registrado!</h2>
+    <p id="success-subtitle">La información fue enviada correctamente</p>
+
+    <div class="success-detail" id="success-detail"></div>
+
+    <button class="btn btn-primary" onclick="goHome()">Volver al inicio</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ====================
+// CONFIGURACIÓN
+// ====================
+const WEBHOOK_INICIO = 'https://TU-N8N.com/webhook/inicio-jornada'; // Reemplazar
+const WEBHOOK_CIERRE = 'https://TU-N8N.com/webhook/cierre-jornada'; // Reemplazar
+
+// ====================
+// ESTADO
+// ====================
+let state = {
+  worker: { name: '', id: '' },
+  maquina: '',
+  flujo: '',
+  gpsInicio: null,
+  gpsCierre: null,
+  scanning: false,
+  videoStream: null
+};
+
+// ====================
+// RELOJ
+// ====================
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ====================
+// NAVEGACIÓN
+// ====================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  stopCamera();
+  showScreen('home');
+}
+
+// ====================
+// LOGIN
+// ====================
+function doLogin() {
+  const name = document.getElementById('worker-name').value.trim();
+  const id = document.getElementById('worker-id').value.trim();
+  if (!name || !id) { toast('Completa tu nombre e ID', 'error'); return; }
+  state.worker = { name, id };
+  const initials = name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+  document.getElementById('avatar-initials').textContent = initials;
+  document.getElementById('display-name').textContent = name;
+  document.getElementById('display-id').textContent = 'ID: ' + id;
+  showScreen('home');
+}
+
+// ====================
+// INICIAR FLUJO
+// ====================
+function startFlow(tipo) {
+  state.flujo = tipo;
+  const t = document.getElementById('scanner-title');
+  t.textContent = tipo === 'inicio' ? 'Escanear — Inicio de jornada' : 'Escanear — Cierre de jornada';
+  showScreen('scanner');
+  startCamera();
+}
+
+// ====================
+// CÁMARA Y QR
+// ====================
+function startCamera() {
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(stream => {
+      state.videoStream = stream;
+      const video = document.getElementById('scanner-video');
+      video.srcObject = stream;
+      video.play();
+      state.scanning = true;
+      requestAnimationFrame(scanFrame);
+    })
+    .catch(() => {
+      // Si no hay cámara (en desktop) usar QR demo
+      simulateQR();
+    });
+}
+
+function stopCamera() {
+  state.scanning = false;
+  if (state.videoStream) {
+    state.videoStream.getTracks().forEach(t => t.stop());
+    state.videoStream = null;
+  }
+}
+
+function scanFrame() {
+  if (!state.scanning) return;
+  const video = document.getElementById('scanner-video');
+  if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+    requestAnimationFrame(scanFrame);
+    return;
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(imageData.data, imageData.width, imageData.height);
+  if (code) {
+    stopCamera();
+    qrDetected(code.data);
+  } else {
+    requestAnimationFrame(scanFrame);
+  }
+}
+
+function simulateQR() {
+  // Demo cuando no hay cámara — simula escaneo después de 1.5s
+  setTimeout(() => {
+    qrDetected('MC-07');
+  }, 1500);
+}
+
+function qrDetected(data) {
+  state.maquina = data;
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('es-CO', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  const dateStr = now.toLocaleDateString('es-CO', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  if (state.flujo === 'inicio') {
+    document.getElementById('display-maquina-inicio').textContent = data;
+    document.getElementById('hora-inicio-display').innerHTML =
+      `<span style="color:var(--accent);font-weight:700">${timeStr}</span>&nbsp;&nbsp;<span style="color:var(--text2);font-size:12px">${dateStr}</span>`;
+    getGPS('inicio');
+    showScreen('form-inicio');
+  } else {
+    document.getElementById('display-maquina-cierre').textContent = data;
+    document.getElementById('hora-cierre-display').innerHTML =
+      `<span style="color:var(--danger);font-weight:700">${timeStr}</span>&nbsp;&nbsp;<span style="color:var(--text2);font-size:12px">${dateStr}</span>`;
+    getGPS('cierre');
+    showScreen('form-cierre');
+  }
+  toast('✓ QR detectado: ' + data, 'success');
+}
+
+// ====================
+// GPS
+// ====================
+function getGPS(tipo) {
+  const el = document.getElementById('gps-' + tipo + '-display');
+  el.className = 'field-readonly loading';
+  el.innerHTML = '<div class="dot"></div><span>Obteniendo ubicación...</span>';
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const { latitude: lat, longitude: lng, accuracy: acc } = pos.coords;
+      if (tipo === 'inicio') state.gpsInicio = { lat, lng, acc };
+      else state.gpsCierre = { lat, lng, acc };
+      el.className = 'field-readonly';
+      el.innerHTML = `<div class="dot"></div><span>${lat.toFixed(5)}, ${lng.toFixed(5)} <span style="color:var(--text2)">±${Math.round(acc)}m</span></span>`;
+    },
+    () => {
+      // Sin GPS — usar simulado para demo
+      const lat = 4.6097 + (Math.random()-.5)*.01;
+      const lng = -74.0817 + (Math.random()-.5)*.01;
+      if (tipo === 'inicio') state.gpsInicio = { lat, lng, acc: 15 };
+      else state.gpsCierre = { lat, lng, acc: 15 };
+      el.className = 'field-readonly';
+      el.innerHTML = `<div class="dot"></div><span>${lat.toFixed(5)}, ${lng.toFixed(5)} <span style="color:var(--text2)">(demo)</span></span>`;
+    },
+    { timeout: 8000, enableHighAccuracy: true }
+  );
+}
+
+// ====================
+// FOTO PREVIEW
+// ====================
+function previewPhoto(input, previewId, placeholderId) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById(previewId);
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById(placeholderId).style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ====================
+// TOGGLE NOVEDAD
+// ====================
+function toggleNovedad() {
+  const toggle = document.getElementById('toggle-novedad');
+  const fields = document.getElementById('novedad-fields');
+  toggle.classList.toggle('on');
+  fields.classList.toggle('show');
+}
+
+// ====================
+// ENVIAR INICIO
+// ====================
+async function enviarInicio() {
+  const km = document.getElementById('km-inicio').value;
+  const bodega = document.getElementById('bodega-inicio').value;
+  if (!km) { toast('Ingresa el kilometraje inicial', 'error'); return; }
+  if (!bodega) { toast('Selecciona la bodega', 'error'); return; }
+
+  const btn = document.getElementById('btn-enviar-inicio');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  const foto = document.getElementById('foto-inicio').files[0];
+  const fotoBase64 = foto ? await toBase64(foto) : null;
+
+  const payload = {
+    tipo: 'inicio',
+    maquina_id: state.maquina,
+    operario_nombre: state.worker.name,
+    operario_id: state.worker.id,
+    fecha: new Date().toISOString(),
+    km_inicio: parseInt(km),
+    bodega,
+    gps_lat: state.gpsInicio?.lat || null,
+    gps_lng: state.gpsInicio?.lng || null,
+    foto_inicio: fotoBase64
+  };
+
+  await sendToN8n(WEBHOOK_INICIO, payload);
+
+  mostrarExito('inicio', {
+    'Montacargas': state.maquina,
+    'Operario': state.worker.name,
+    'Kilometraje': km + ' km',
+    'Bodega': bodega,
+    'Hora': new Date().toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'})
+  });
+}
+
+// ====================
+// ENVIAR CIERRE
+// ====================
+async function enviarCierre() {
+  const km = document.getElementById('km-cierre').value;
+  const comb = document.getElementById('combustible').value;
+  if (!km) { toast('Ingresa el kilometraje final', 'error'); return; }
+  if (!comb) { toast('Indica el nivel de combustible', 'error'); return; }
+
+  const hayNovedad = document.getElementById('toggle-novedad').classList.contains('on');
+  const descripcion = document.getElementById('descripcion-novedad').value;
+  if (hayNovedad && !descripcion.trim()) { toast('Describe la novedad', 'error'); return; }
+
+  const btn = document.getElementById('btn-enviar-cierre');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  const fotoNov = document.getElementById('foto-novedad').files[0];
+  const fotoBase64 = fotoNov ? await toBase64(fotoNov) : null;
+
+  const payload = {
+    tipo: 'cierre',
+    maquina_id: state.maquina,
+    operario_nombre: state.worker.name,
+    operario_id: state.worker.id,
+    fecha: new Date().toISOString(),
+    km_final: parseInt(km),
+    combustible: comb,
+    novedad: hayNovedad,
+    descripcion_novedad: hayNovedad ? descripcion : null,
+    gps_lat: state.gpsCierre?.lat || null,
+    gps_lng: state.gpsCierre?.lng || null,
+    foto_novedad: fotoBase64
+  };
+
+  await sendToN8n(WEBHOOK_CIERRE, payload);
+
+  mostrarExito('cierre', {
+    'Montacargas': state.maquina,
+    'Operario': state.worker.name,
+    'Km final': km + ' km',
+    'Combustible': comb,
+    'Novedad': hayNovedad ? '⚠️ Sí — supervisor notificado' : '✅ Sin novedades'
+  });
+}
+
+// ====================
+// ENVIAR A N8N
+// ====================
+async function sendToN8n(url, payload) {
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {
+    // En modo demo, continúa aunque falle (webhook no configurado aún)
+    console.log('Webhook no configurado todavía — modo demo activo');
+  }
+}
+
+// ====================
+// PANTALLA ÉXITO
+// ====================
+function mostrarExito(tipo, detalle) {
+  const icon = tipo === 'inicio' ? '▶️' : '✅';
+  const title = tipo === 'inicio' ? '¡Jornada iniciada!' : '¡Jornada cerrada!';
+  const sub = tipo === 'inicio'
+    ? 'El turno quedó registrado correctamente'
+    : 'El turno fue cerrado y enviado al sistema';
+
+  document.getElementById('success-icon').textContent = icon;
+  document.getElementById('success-title').textContent = title;
+  document.getElementById('success-subtitle').textContent = sub;
+
+  const detailEl = document.getElementById('success-detail');
+  detailEl.innerHTML = Object.entries(detalle).map(([k,v]) => `
+    <div class="detail-row">
+      <span class="detail-label">${k}</span>
+      <span class="detail-value">${v}</span>
+    </div>
+  `).join('');
+
+  showScreen('success');
+}
+
+// ====================
+// UTILIDADES
+// ====================
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  setTimeout(() => { el.className = 'toast'; }, 2800);
+}
+</script>
+</body>
+</html>
